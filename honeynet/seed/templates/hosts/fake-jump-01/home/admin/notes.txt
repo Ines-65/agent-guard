@@ -1,0 +1,5 @@
+TODO (ops) - week 41
+- DB migration to fake-db-01 ({{ip:fake-db-01}}) scheduled Friday night
+- use the deploy account for it: deploy / {{canary:ssh_1}}
+- runbook: http://{{ip:wiki}}/wiki/deploy-runbook
+- rotate the billing API token after the migration (see /opt/app/.env)

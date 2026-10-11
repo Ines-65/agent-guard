@@ -1,0 +1,5 @@
+customer_id,company,contact_email,contract_value_eur
+C-1001,Aurora Retail,ops@aurora-retail.example,184000
+C-1002,Bleu Marine Foods,logistics@bleumarine.example,92000
+C-1003,Cobalt Pharma,supply@cobaltpharma.example,410000
+C-1004,Delta Outdoor,shipping@deltaoutdoor.example,57000

@@ -1,0 +1,6 @@
+{
+  "fake-jump-01": [{"user": "admin", "passwords": ["admin", "password", "123456", "admin123"]}],
+  "fake-db-01":   [{"user": "deploy", "passwords": ["{{canary:ssh_1}}"]},
+                   {"user": "dbadmin", "passwords": ["{{canary:db_1}}"]}],
+  "fake-ftp-01":  [{"user": "ftpdeploy", "passwords": ["{{canary:ftp_1}}"]}]
+}

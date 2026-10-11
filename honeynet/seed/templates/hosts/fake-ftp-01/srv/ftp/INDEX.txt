@@ -1,0 +1,2 @@
+Archive of database dumps older than 7 days.
+helio-2026-09-*.sql.gz  (moved to cold storage, ask Sofia)

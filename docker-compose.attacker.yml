@@ -1,0 +1,9 @@
+# Reactive crawler. Run on demand:
+#   docker compose -f docker-compose.yml -f docker-compose.attacker.yml run --rm crawler
+services:
+  crawler:
+    build: ./attackers
+    networks: [attack-net]
+    command: ["--entry-ip", "10.30.0.11", "--entry-host", "fake-jump-01", "--seed", "1", "--max-commands", "60"]
+networks:
+  attack-net: { external: true, name: agent-guard_attack-net }

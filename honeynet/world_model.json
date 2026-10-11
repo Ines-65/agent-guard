@@ -1,0 +1,28 @@
+{
+  "company_name": "Helio Freight",
+  "industry": "Logistics",
+  "product": "Helio Tracker, a shipment tracking web app",
+  "domain": "corp.helio.internal",
+  "tech_stack": ["Node.js 20", "Express", "MySQL 8", "Ubuntu 22.04", "AWS S3"],
+  "employees": [
+    {"name": "Ops shared account", "role": "Shared admin", "department": "Infrastructure", "username": "admin"},
+    {"name": "Deploy service", "role": "CI/CD service account", "department": "Infrastructure", "username": "deploy"},
+    {"name": "Lina Moreau", "role": "SRE", "department": "Infrastructure", "username": "lmoreau"},
+    {"name": "Karim Benali", "role": "Backend engineer", "department": "Engineering", "username": "kbenali"},
+    {"name": "Sofia Lindqvist", "role": "DBA", "department": "Data", "username": "slindqvist"},
+    {"name": "Tom Okafor", "role": "Finance analyst", "department": "Finance", "username": "tokafor"}
+  ],
+  "hosts": [
+    {"name": "fake-jump-01", "ip": "10.30.0.11", "role": "jump", "services": ["ssh"], "decoy": true, "min_tier": 1},
+    {"name": "fake-db-01",   "ip": "10.30.0.12", "role": "db",   "services": ["ssh", "mysql"], "decoy": true, "min_tier": 1},
+    {"name": "fake-ftp-01",  "ip": "10.30.0.13", "role": "ftp",  "services": ["ssh", "ftp"], "decoy": true, "min_tier": 3},
+    {"name": "wiki",         "ip": "10.30.0.20", "role": "wiki", "services": ["http"], "decoy": true, "min_tier": 1},
+    {"name": "billing-api",  "ip": "10.30.0.30", "role": "canary", "services": ["http"], "decoy": true, "min_tier": 1}
+  ],
+  "internal_urls": [
+    "http://10.30.0.20/wiki/onboarding",
+    "http://10.30.0.20/wiki/deploy-runbook",
+    "http://10.30.0.20/wiki/on-call",
+    "http://10.30.0.30/v1/invoices"
+  ]
+}

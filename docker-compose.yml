@@ -1,0 +1,142 @@
+# Maya Agentic - Phase 1: honeynet, AI-trap endpoints, collector, dashboard.
+# Zone rules (from the build plan):
+#   attack-net is internal (no internet); only llm-gateway also joins egress-net;
+#   no container joins both attack-net and defense-net. Logs flow out as read-only
+#   volume mounts the collector reads; control flows in via /deception and /control.
+
+networks:
+  attack-net:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.30.0.0/24
+          gateway: 10.30.0.1
+  egress-net: {}
+  defense-net: {}
+
+volumes:
+  mongo-data:
+  cowrie-logs:    # decoys write, collector reads (ro)
+  trap-logs:      # wiki + canary write, collector reads (ro)
+  deception:      # seed + (later) maya-control write, decoys/wiki read (ro)
+  control:        # seed + (later) maya-control write: userdb, services, run.json
+
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    networks: [defense-net]
+    volumes: [mongo-data:/data/db]
+
+  seed:
+    build: ./honeynet/seed
+    networks: [defense-net]
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: maya
+      SEED_RESET: "1"
+      WORLD_MODEL: /app/world_model.json
+      LOG_DIRS: /logs-cowrie:/logs-trap
+    volumes:
+      - deception:/deception
+      - control:/control
+      - cowrie-logs:/logs-cowrie
+      - trap-logs:/logs-trap
+      - ./honeynet/world_model.json:/app/world_model.json:ro
+    depends_on: [mongo]
+    restart: "no"   # one-shot: seeds canaries + breadcrumbs, then exits
+
+  decoy-jump:
+    build: ./honeynet/decoy
+    restart: unless-stopped
+    networks:
+      attack-net: { ipv4_address: 10.30.0.11 }
+    environment: { DECOY_HOST: fake-jump-01, DECOY_IP: 10.30.0.11, DECOY_PORT: "22" }
+    volumes:
+      - deception:/deception:ro
+      - control:/control:ro
+      - cowrie-logs:/logs
+      - ./honeynet/world_model.json:/world_model.json:ro
+    depends_on: [seed]
+
+  decoy-db:
+    build: ./honeynet/decoy
+    restart: unless-stopped
+    networks:
+      attack-net: { ipv4_address: 10.30.0.12 }
+    environment: { DECOY_HOST: fake-db-01, DECOY_IP: 10.30.0.12, DECOY_PORT: "22" }
+    volumes:
+      - deception:/deception:ro
+      - control:/control:ro
+      - cowrie-logs:/logs
+      - ./honeynet/world_model.json:/world_model.json:ro
+    depends_on: [seed]
+
+  decoy-ftp:
+    build: ./honeynet/decoy
+    restart: unless-stopped
+    networks:
+      attack-net: { ipv4_address: 10.30.0.13 }
+    environment: { DECOY_HOST: fake-ftp-01, DECOY_IP: 10.30.0.13, DECOY_PORT: "22" }
+    volumes:
+      - deception:/deception:ro
+      - control:/control:ro
+      - cowrie-logs:/logs
+      - ./honeynet/world_model.json:/world_model.json:ro
+    depends_on: [seed]
+
+  wiki:
+    build: ./honeynet/wiki
+    restart: unless-stopped
+    networks:
+      attack-net: { ipv4_address: 10.30.0.20 }
+    volumes:
+      - deception:/deception:ro
+      - trap-logs:/logs
+    depends_on: [seed]
+
+  canary:
+    build: ./ai_traps/canary
+    restart: unless-stopped
+    networks:
+      attack-net: { ipv4_address: 10.30.0.30 }
+    volumes:
+      - trap-logs:/logs
+    depends_on: [seed]
+
+  # llm-gateway: the only attack-zone container with a route out. Needed by the
+  # victim and LLM attacker in later phases; harmless to run now.
+  gateway:
+    build: ./honeynet/gateway
+    restart: unless-stopped
+    networks: [attack-net, egress-net]
+    environment:
+      BEDROCK_REGION: us-west-2
+      MODELS: ${GATEWAY_MODELS:-fast=us.anthropic.claude-haiku-5-5}
+      CALLERS: victim,attacker,recon
+    volumes:
+      - trap-logs:/logs
+    depends_on: [seed]
+
+  collector:
+    build: ./collector
+    restart: unless-stopped
+    networks: [defense-net]
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: maya
+    volumes:
+      - cowrie-logs:/in/cowrie:ro
+      - trap-logs:/in/trap:ro
+      - control:/control:ro
+      - ./schemas/event.json:/schemas/event.json:ro
+    depends_on: [mongo, seed]
+
+  dashboard:
+    build: ./dashboard
+    restart: unless-stopped
+    networks: [defense-net]
+    environment: { MONGO_URI: mongodb://mongo:27017, MONGO_DB: maya }
+    ports: ["127.0.0.1:8501:8501"]
+    depends_on: [mongo]

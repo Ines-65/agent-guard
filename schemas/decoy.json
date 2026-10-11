@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decoy.json",
+  "title": "Decoy",
+  "description": "Every breadcrumb, file, wiki page or credential planted, by any policy.",
+  "type": "object",
+  "required": ["decoy_id", "kind", "host", "path", "policy", "created_at", "reason", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "decoy_id":   {"type": "string", "pattern": "^dec-[0-9]{4,}$"},
+    "run_id":     {"type": ["string", "null"]},
+    "session_id": {"type": ["string", "null"], "description": "null for starting breadcrumbs planted for everyone"},
+    "host":       {"type": "string"},
+    "kind":       {"enum": ["file", "wiki_page", "credential"]},
+    "path":       {"type": "string", "description": "Under an allowed prefix (e.g. /opt/app/, /home/, /deception/wiki/)"},
+    "policy":     {"enum": ["seed", "static", "rl", "agent"]},
+    "canaries":   {"type": "array", "items": {"pattern": "^canary:[a-z]+_[0-9]+$"}, "default": []},
+    "size_bytes": {"type": "integer", "minimum": 0, "maximum": 8192},
+    "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "reason":     {"type": "string", "maxLength": 500},
+    "evidence":   {"type": "array", "items": {"pattern": "^evt-[0-9]{6,}$"}},
+    "created_at": {"type": "string", "format": "date-time"},
+    "touched_by": {"type": "array", "items": {"pattern": "^evt-[0-9]{6,}$"}, "default": []}
+  }
+}

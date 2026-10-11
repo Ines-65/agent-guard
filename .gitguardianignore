@@ -1,0 +1,5 @@
+version: 2
+secret:
+  ignored_matches:
+    - name: mitre-technique-id-false-positive
+      match: f3611563f1285cac6ecaea73785d082a795e7f96530e161de5cdfe3a78eb3f3a

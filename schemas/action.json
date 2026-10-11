@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "action.json",
+  "title": "Action",
+  "description": "Audit record of every maya-control tool call, allowed or not.",
+  "type": "object",
+  "required": ["action_id", "ts", "session_id", "policy", "tool", "params", "risk", "status", "reason", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "action_id":  {"type": "string", "pattern": "^act-[0-9]{4,}$"},
+    "ts":         {"type": "string", "format": "date-time"},
+    "run_id":     {"type": ["string", "null"]},
+    "session_id": {"type": "string"},
+    "policy":     {"enum": ["static", "rl", "agent"]},
+    "tool":       {"enum": ["observe", "plant_breadcrumb", "create_wiki_page", "tag_session", "escalate_tier", "open_decoy_service", "recommend_block", "revoke_agent_token", "disable_mcp_tool"]},
+    "params":     {"type": "object"},
+    "risk":       {"enum": ["auto", "approval"]},
+    "status":     {"enum": ["executed", "pending", "approved", "rejected", "expired", "blocked"]},
+    "blocked_by": {"enum": ["schema", "allowlist", "kill_switch", "cap", "secret_filter", "never_block", null]},
+    "reason":     {"type": "string", "maxLength": 500},
+    "evidence":   {"type": "array", "items": {"pattern": "^evt-[0-9]{6,}$"}},
+    "result":     {"type": ["object", "null"], "description": "e.g. {decoy_id: ...} when a decoy was created"},
+    "decided_by": {"type": ["string", "null"]},
+    "decided_at": {"type": ["string", "null"], "format": "date-time"},
+    "reject_reason": {"type": ["string", "null"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "rejected"}}}, "then": {"required": ["reject_reason"], "properties": {"reject_reason": {"type": "string", "minLength": 3}}}},
+    {"if": {"properties": {"status": {"const": "blocked"}}}, "then": {"properties": {"blocked_by": {"type": "string"}}, "required": ["blocked_by"]}}
+  ]
+}

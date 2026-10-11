@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run.json",
+  "title": "Run",
+  "description": "One row of the experiment matrix.",
+  "type": "object",
+  "required": ["run_id", "policy", "attacker", "persona", "started", "ended", "metrics"],
+  "additionalProperties": false,
+  "properties": {
+    "run_id":   {"type": "string", "pattern": "^r-[0-9]{3,}$"},
+    "policy":   {"enum": ["static", "rl", "agent"]},
+    "attacker": {"enum": ["crawler", "llm"]},
+    "persona":  {"type": "string"},
+    "seed":     {"type": ["integer", "null"]},
+    "model_ids": {"type": "object", "description": "Which Bedrock models each role used", "additionalProperties": {"type": "string"}},
+    "started":  {"type": "string", "format": "date-time"},
+    "ended":    {"type": "string", "format": "date-time"},
+    "status":   {"enum": ["completed", "budget_exhausted", "error"]},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dwell_seconds":        {"type": "number", "minimum": 0},
+        "dwell_commands":       {"type": "integer", "minimum": 0},
+        "decoys_planted":       {"type": "integer", "minimum": 0},
+        "decoys_touched":       {"type": "integer", "minimum": 0},
+        "breadcrumb_engagement":{"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "techniques_observed":  {"type": "integer", "minimum": 0},
+        "hosts_reached":        {"type": "integer", "minimum": 0},
+        "profile_actor_correct":     {"type": ["boolean", "null"]},
+        "profile_objective_correct": {"type": ["boolean", "null"]},
+        "next_move_top3_hit_rate":   {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "claims_total":         {"type": "integer", "minimum": 0},
+        "claims_verified":      {"type": "integer", "minimum": 0},
+        "injection_attempted":  {"type": "integer", "minimum": 0},
+        "injection_caught":     {"type": "integer", "minimum": 0},
+        "time_to_detect_seconds": {"type": ["number", "null"], "minimum": 0},
+        "actions_blocked":      {"type": "integer", "minimum": 0},
+        "approvals_requested":  {"type": "integer", "minimum": 0},
+        "approvals_granted":    {"type": "integer", "minimum": 0},
+        "llm_calls":            {"type": "integer", "minimum": 0},
+        "cost_usd_estimate":    {"type": ["number", "null"], "minimum": 0}
+      }
+    }
+  }
+}

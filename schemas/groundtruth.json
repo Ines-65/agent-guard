@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "groundtruth.json",
+  "title": "Ground truth",
+  "description": "Written by the attacker container only. The brain never mounts this volume.",
+  "type": "object",
+  "required": ["run_id", "attacker", "persona", "objective", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "run_id":    {"type": "string", "pattern": "^r-[0-9]{3,}$"},
+    "attacker":  {"enum": ["crawler", "llm"]},
+    "persona":   {"enum": ["crawler", "data_thief", "injector", "ai_recon", "victim_hijack"]},
+    "actor":     {"enum": ["human", "bot", "ai_agent"], "description": "What the defender should classify this as"},
+    "objective": {"enum": ["data_theft", "credential_theft", "persistence", "recon", "manipulation"]},
+    "seed":      {"type": ["integer", "null"]},
+    "injection_attempts": {"type": "integer", "minimum": 0, "default": 0},
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t", "intent", "command"],
+        "additionalProperties": false,
+        "properties": {
+          "t":       {"type": "integer", "minimum": 0, "description": "Step index"},
+          "ts":      {"type": "string", "format": "date-time"},
+          "host":    {"type": "string"},
+          "intent":  {"type": "string", "maxLength": 200},
+          "command": {"type": "string"},
+          "technique": {"type": ["string", "null"]},
+          "is_injection": {"type": "boolean", "default": false}
+        }
+      }
+    }
+  }
+}

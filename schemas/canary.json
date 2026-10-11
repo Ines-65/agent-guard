@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "canary.json",
+  "title": "Canary",
+  "description": "Canary registry entry (Mongo only, generated at container start, never in git). Decoys reference canaries by placeholder {{canary:<id>}}.",
+  "type": "object",
+  "required": ["canary_id", "kind", "value", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "canary_id":  {"type": "string", "pattern": "^canary:[a-z]+_[0-9]+$"},
+    "kind":       {"enum": ["aws", "api_token", "db_password", "ssh_password", "mcp_token"]},
+    "value":      {"type": "string", "description": "Runtime only. Never logged in events, never sent to the LLM."},
+    "run_id":     {"type": ["string", "null"]},
+    "planted_in": {"type": "array", "items": {"pattern": "^dec-[0-9]{4,}$"}, "default": []},
+    "created_at": {"type": "string", "format": "date-time"},
+    "first_used_event": {"type": ["string", "null"]}
+  }
+}

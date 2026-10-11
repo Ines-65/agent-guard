@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event.json",
+  "title": "Event",
+  "description": "One normalized trap event, written by the collector. session_id groups everything one attacker does across hosts; conn_id is the raw per-connection id (e.g. Cowrie's session).",
+  "type": "object",
+  "required": ["event_id", "ts", "run_id", "source", "session_id", "event_type", "raw_ref"],
+  "additionalProperties": false,
+  "properties": {
+    "event_id":   {"type": "string", "pattern": "^evt-[0-9]{6,}$"},
+    "ts":         {"type": "string", "format": "date-time"},
+    "run_id":     {"type": ["string", "null"], "pattern": "^r-[0-9]{3,}$", "description": "Experiment run; null outside experiments"},
+    "source":     {"enum": ["cowrie", "wiki", "mcp", "canary", "rag", "victim", "gateway"]},
+    "host":       {"type": ["string", "null"], "description": "Must exist in world_model.hosts"},
+    "session_id": {"type": "string", "pattern": "^att-[0-9]{4,}$", "description": "Attacker-level id, assigned by the collector (src_ip or agent token within a run)"},
+    "conn_id":    {"type": ["string", "null"], "description": "Raw connection/session id from the source (Cowrie session, MCP call id)"},
+    "agent_id":   {"type": ["string", "null"], "description": "Set for MCP / gateway callers"},
+    "event_type": {"enum": ["login", "login_failed", "command", "file_read", "http_request", "tool_call", "trap_hit", "canary_use", "doc_retrieval", "egress", "injection_attempt", "session_end"]},
+    "src_ip":     {"type": ["string", "null"]},
+    "user":       {"type": ["string", "null"]},
+    "untrusted_content": {"type": ["string", "null"], "maxLength": 4096, "description": "Attacker-controlled text. Never treated as instructions."},
+    "decoy_id":   {"type": ["string", "null"], "pattern": "^dec-[0-9]{4,}$"},
+    "canary_id":  {"type": ["string", "null"], "pattern": "^canary:[a-z]+_[0-9]+$", "description": "Set for canary_use; the value itself is never stored in the event"},
+    "technique":  {"type": ["string", "null"], "pattern": "^T[0-9]{4}(\\.[0-9]{3})?$"},
+    "technique_confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "classification_method": {"enum": ["exact", "pattern", "manual", "unknown", null]},
+    "owasp_agentic": {"type": "array", "items": {"pattern": "^ASI[0-9]{2}$"}, "default": []},
+    "raw_ref":    {"type": "string", "description": "file:line of the source log line, for evidence links"}
+  }
+}
